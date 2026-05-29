@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#000000"/>
+<title>BDC Space Fund</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════ iOS 26 LIQUID GLASS TOKENS ═══════════════════════ */
+:root {
+  --base:   #000;
+  --base-1: #0a0a0a;
+  --base-2: #111;
+  --base-3: #161616;
+
+  --glass-0: rgba(255,255,255,0.03);
+  --glass-1: rgba(255,255,255,0.06);
+  --glass-2: rgba(255,255,255,0.09);
+  --glass-3: rgba(255,255,255,0.13);
+  --glass-border:    rgba(255,255,255,0.10);
+  --glass-border-hi: rgba(255,255,255,0.18);
+
+  --t1: rgba(255,255,255,1);
+  --t2: rgba(255,255,255,0.75);
+  --t3: rgba(255,255,255,0.45);
+  --t4: rgba(255,255,255,0.28);
+
+  --green:  #30d158;
+  --red:    #ff453a;
+  --amber:  #ffd60a;
+  --blue:   #0a84ff;
+  --teal:   #5ac8fa;
+  --purple: #bf5af2;
+
+  --accent:        #5ac8fa;
+  --accent-dim:    rgba(90,200,250,0.12);
+  --accent-border: rgba(90,200,250,0.22);
+
+  --blur-sm: blur(12px) saturate(1.6);
+  --blur-md: blur(24px) saturate(1.8);
+  --blur-lg: blur(40px) saturate(2.0);
+
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+}
+
+*, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: var(--base);
+  color: var(--t1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+.mono { font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.pos  { color: var(--green); }
+.neg  { color: var(--red);   }
+.zero { color: var(--t3);    }
+
+/* ── BACKGROUND GLOW ── */
+#bg-glow {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.glow-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(100px); opacity: 0.13;
+}
+.go-1 { width: 500px; height: 500px; background: var(--teal);   top: -150px; right: -100px; }
+.go-2 { width: 380px; height: 380px; background: var(--purple); top: 300px; left: -80px; opacity: 0.09; }
+.go-3 { width: 350px; height: 350px; background: var(--blue);   bottom: 100px; right: -60px; opacity: 0.08; }
+.go-4 { width: 280px; height: 280px; background: var(--teal);   bottom: 50%; left: 40%; opacity: 0.07; }
+
+/* ── APP SHELL ── */
+#app {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  min-height: 100dvh;
+  padding-top: var(--sat);
+}
+
+/* ── NAV BAR ── */
+#navbar {
+  position: sticky; top: 0; z-index: 200;
+  padding: calc(var(--sat) + 12px) 20px 12px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border-bottom: 1px solid var(--glass-border);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.nav-brand { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.nav-logo {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(145deg, #0a5080 0%, #5ac8fa 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 2px 12px rgba(90,200,250,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+.nav-title { line-height: 1; }
+.nav-sup  { font-size: 10px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: var(--t3); }
+.nav-main { font-size: 17px; font-weight: 700; color: var(--t1); margin-top: 1px; }
+.nav-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+#status-row { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--t3); }
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); flex-shrink: 0;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+.status-dot.loading { background: var(--amber); animation: none; }
+.status-dot.err     { background: var(--red);   animation: none; }
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(90,200,250,0.5); }
+  50%       { box-shadow: 0 0 0 5px rgba(90,200,250,0); }
+}
+#refresh-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--glass-2);
+  border: 1px solid var(--glass-border-hi);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  color: var(--teal);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: all .2s cubic-bezier(.34,1.56,.64,1);
+}
+#refresh-btn:active { transform: scale(0.93); opacity: .7; }
+
+/* ── SCROLL CONTENT ── */
+.scroll-content {
+  padding: 20px 16px calc(var(--sab) + 36px);
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── ERROR BANNER ── */
+#err-banner {
+  display: none;
+  margin: 12px 16px 0;
+  padding: 12px 16px;
+  border-radius: var(--r-sm);
+  background: rgba(255,69,58,0.12);
+  border: 1px solid rgba(255,69,58,0.25);
+  font-size: 12px; color: var(--red); line-height: 1.5;
+}
+#err-banner.show { display: block; }
+
+/* ── GLASS CARD ── */
+.glass-card {
+  background: var(--glass-1);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  overflow: hidden;
+  position: relative;
+}
+.glass-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── HERO KPI GRID ── */
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+@media (min-width: 560px) {
+  .hero-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.kpi-card {
+  border-radius: var(--r-xl);
+  padding: 20px 18px 18px;
+  position: relative; overflow: hidden;
+}
+.kpi-card-teal {
+  background: linear-gradient(145deg, rgba(90,200,250,0.16) 0%, rgba(90,200,250,0.05) 100%);
+  border: 1px solid var(--accent-border);
+  box-shadow: 0 0 40px rgba(90,200,250,0.09), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.kpi-card-glass {
+  background: var(--glass-1);
+  border: 1px solid var(--glass-border);
+}
+.kpi-shine {
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+}
+.kpi-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .14em; color: var(--t3); margin-bottom: 10px;
+}
+.kpi-big {
+  font-size: clamp(22px, 5vw, 36px); font-weight: 800; letter-spacing: -.03em; line-height: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kpi-big .cur { font-size: 12px; font-weight: 600; color: var(--t3); vertical-align: super; margin-right: 2px; }
+.kpi-sub-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.kpi-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 700;
+  padding: 4px 10px; border-radius: 10px;
+}
+.kpi-badge.pos { background: rgba(48,209,88,0.15);  color: var(--green); border: 1px solid rgba(48,209,88,0.25); }
+.kpi-badge.neg { background: rgba(255,69,58,0.15);  color: var(--red);   border: 1px solid rgba(255,69,58,0.25); }
+.kpi-badge.zero{ background: var(--glass-1);         color: var(--t3);   border: 1px solid var(--glass-border); }
+.kpi-hint { font-size: 11px; color: var(--t3); }
+.kpi-cost { font-size: 11px; color: var(--t4); margin-top: 5px; font-family: 'JetBrains Mono', monospace; }
+
+/* ── SECTION HEADER ── */
+.sec-head {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--t3); margin: 26px 0 10px; padding: 0 2px;
+}
+.sec-accent { width: 16px; height: 2px; border-radius: 1px; background: var(--accent); flex-shrink: 0; }
+
+/* ── PERFORMANCE CHART ── */
+.perf-card { padding: 18px; margin-bottom: 14px; }
+
+/* ── HOLDINGS TABLE ── */
+.hold-table { border-radius: var(--r-lg); overflow: hidden; }
+
+/* desktop table header */
+.hold-thead {
+  display: none;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.03);
+}
+@media (min-width: 700px) {
+  .hold-thead { display: grid; }
+}
+
+.hold-row {
+  display: grid;
+  grid-template-columns: 56px 1fr 54px 90px 90px 100px 60px 80px;
+  align-items: center; gap: 8px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--glass-border);
+  background: var(--glass-0);
+  transition: background .15s;
+}
+.hold-row:last-child  { border-bottom: none; }
+.hold-row:active      { background: var(--glass-2); }
+.hold-thead .hold-row { padding: 0; background: transparent; border: none; }
+
+/* on mobile: collapse to 2-col layout */
+@media (max-width: 699px) {
+  .hold-thead { display: none; }
+  .hold-row {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
+    gap: 4px 10px;
+  }
+  .col-ticker  { grid-column: 1; grid-row: 1; }
+  .col-name    { grid-column: 1; grid-row: 2; font-size: 11px; }
+  .col-shares  { display: none; }
+  .col-cost    { display: none; }
+  .col-cur     { grid-column: 2; grid-row: 1; text-align: right; }
+  .col-pnl     { grid-column: 2; grid-row: 2; text-align: right; }
+  .col-day     { grid-column: 1; grid-row: 3; }
+  .col-weight  { grid-column: 2; grid-row: 3; }
+}
+
+.th { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--t4); }
+
+/* Column value styles */
+.col-ticker .tk  { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; color: var(--accent); }
+.col-ticker .bk  { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--t4); margin-top: 1px; }
+.col-name  .nm   { font-size: 12px; color: var(--t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.col-name  .nm-b { font-size: 9px; color: var(--t4); margin-top: 1px; text-transform: uppercase; letter-spacing: .05em; }
+.col-shares .sv  { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--t2); }
+.col-cost .cv    { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--t3); }
+.col-cost .cv-b  { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--t4); margin-top: 1px; }
+.col-cur  .cp    { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--t1); }
+.col-cur  .cv2   { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--t3); margin-top: 1px; }
+.col-pnl  .pv    { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; }
+.col-pnl  .pp    { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; margin-top: 1px; }
+.col-day  .dv    { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+.col-weight {display: flex; flex-direction: column; gap: 4px; }
+.w-pct    { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--t3); }
+.w-bar    { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.07); overflow: hidden; }
+.w-fill   { height: 3px; border-radius: 2px; background: linear-gradient(90deg, #2a6e8a, #5ac8fa); }
+
+/* ── SECTOR DONUT ── */
+.sector-wrap { border-radius: var(--r-lg); overflow: hidden; }
+.chart-box   { padding: 18px; }
+.donut-wrap  { height: 200px; margin-bottom: 16px; display: flex; justify-content: center; }
+.donut-wrap canvas { max-width: 200px; max-height: 200px; }
+.sleg { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.sleg-item { display: flex; align-items: center; gap: 7px; font-size: 11px; }
+.sleg-dot  { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.sleg-name { flex: 1; color: var(--t2); }
+.sleg-w    { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--t3); }
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  padding: 28px 20px 10px;
+  font-size: 10px; color: var(--t4); line-height: 1.8;
+}
+
+/* ── DESKTOP TWEAKS ── */
+@media (min-width: 600px) {
+  .scroll-content { padding: 24px 28px calc(var(--sab) + 48px); }
+}
+@media (min-width: 960px) {
+  .scroll-content { padding: 28px 40px calc(var(--sab) + 56px); }
+}
+</style>
+</head>
+<body>
+
+<div id="bg-glow">
+  <div class="glow-orb go-1"></div>
+  <div class="glow-orb go-2"></div>
+  <div class="glow-orb go-3"></div>
+  <div class="glow-orb go-4"></div>
+</div>
+
+<div id="app">
+
+  <!-- NAV BAR -->
+  <div id="navbar">
+    <div class="nav-brand">
+      <div class="nav-logo">🛰️</div>
+      <div class="nav-title">
+        <div class="nav-sup">B. de Clerk · Personal Portfolio</div>
+        <div class="nav-main">BDC Space Fund</div>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div id="status-row">
+        <span class="status-dot" id="sdot"></span>
+        <span id="stxt">Loading…</span>
+      </div>
+      <button id="refresh-btn" onclick="forceRefresh()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <!-- ERROR BANNER -->
+  <div id="err-banner"></div>
+
+  <div class="scroll-content">
+
+    <!-- HERO KPI CARDS -->
+    <div class="hero-grid">
+
+      <!-- Portfolio Value -->
+      <div class="kpi-card kpi-card-teal">
+        <div class="kpi-shine"></div>
+        <div class="kpi-label">Portfolio Value</div>
+        <div class="kpi-big"><span class="cur">USD</span><span id="kpi-val">—</span></div>
+        <div class="kpi-sub-row">
+          <span class="kpi-badge zero" id="kpi-pnl-badge">—</span>
+        </div>
+        <div class="kpi-cost" id="kpi-cost">Cost basis: —</div>
+      </div>
+
+      <!-- Total P&L -->
+      <div class="kpi-card kpi-card-glass">
+        <div class="kpi-shine"></div>
+        <div class="kpi-label">Total P&amp;L</div>
+        <div class="kpi-big mono" id="kpi-pnl-usd">—</div>
+        <div class="kpi-sub-row">
+          <span class="kpi-badge zero" id="kpi-pnl-pct-badge">—</span>
+          <span class="kpi-hint" id="kpi-inception">Since 29 May 2026</span>
+        </div>
+      </div>
+
+      <!-- vs S&P 500 -->
+      <div class="kpi-card kpi-card-glass">
+        <div class="kpi-shine"></div>
+        <div class="kpi-label">vs S&amp;P 500</div>
+        <div class="kpi-big mono" id="kpi-alpha">—</div>
+        <div class="kpi-sub-row">
+          <span class="kpi-badge zero" id="kpi-spy-badge">—</span>
+          <span class="kpi-hint">SPY since 29 May</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PERFORMANCE CHART -->
+    <div class="sec-head"><span class="sec-accent"></span>Performance vs S&amp;P 500</div>
+    <div class="glass-card perf-card">
+      <canvas id="perf-chart" height="180"></canvas>
+    </div>
+
+    <!-- HOLDINGS TABLE -->
+    <div class="sec-head"><span class="sec-accent"></span>Holdings</div>
+    <div class="hold-table glass-card">
+      <div class="hold-thead">
+        <div class="hold-row">
+          <div class="th col-ticker">Ticker</div>
+          <div class="th col-name">Name</div>
+          <div class="th col-shares">Shares</div>
+          <div class="th col-cost">Cost Basis</div>
+          <div class="th col-cur">Price / Value</div>
+          <div class="th col-pnl">P&amp;L</div>
+          <div class="th col-day">Day</div>
+          <div class="th col-weight">Weight</div>
+        </div>
+      </div>
+      <div id="hold-body"></div>
+    </div>
+
+    <!-- SECTOR DONUT -->
+    <div class="sec-head"><span class="sec-accent"></span>Sector Allocation</div>
+    <div class="sector-wrap glass-card">
+      <div class="chart-box">
+        <div class="donut-wrap"><canvas id="sector-chart"></canvas></div>
+        <div class="sleg" id="sector-leg"></div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      Managed by B. de Clerk &middot; Pofmuis Portfolio Managers &middot; Inception 29 May 2026<br>
+      Personal portfolio tracker &middot; Not investment advice<br>
+      Updated: <span id="ft-ts">—</span>
+    </div>
+
+  </div><!-- /scroll-content -->
+</div><!-- /app -->
+
+<script>
+/* ── SECTOR COLOURS ── */
+const SC = {
+  'Launch & Systems':     '#5ac8fa',
+  'Direct-to-Cell':       '#bf5af2',
+  'Earth Observation':    '#30d158',
+  'SatComms':             '#0a84ff',
+  'Space Data':           '#ffd60a',
+  'In-Space Logistics':   '#ff375f',
+  'Aerospace Components': '#ff6961',
+  'Aerostructures':       '#5e5ce6',
+  'Composite Materials':  '#98989d',
+  'Space Electronics':    '#ff9f0a',
+};
+
+/* ── HELPERS ── */
+function ps(v, d=2) {
+  if (v == null || isNaN(v)) return '—';
+  return (v >= 0 ? '+' : '') + Number(v).toFixed(d) + '%';
+}
+function usd(v, d=2) {
+  if (v == null || isNaN(v)) return '—';
+  const sign = v < 0 ? '-' : v > 0 ? '+' : '';
+  return sign + '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+function usdPlain(v, d=2) {
+  if (v == null || isNaN(v)) return '—';
+  return '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+function cls(v) {
+  if (v == null || isNaN(v)) return 'zero';
+  return v > 0.001 ? 'pos' : v < -0.001 ? 'neg' : 'zero';
+}
+function esc(s) {
+  return s == null ? '' : String(s).replace(/[&<>"']/g, m =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m] || m));
+}
+function set(id, txt, c) {
+  const e = document.getElementById(id);
+  if (!e) return;
+  e.textContent = txt;
+  if (c !== undefined) {
+    e.className = e.className.replace(/\b(pos|neg|zero)\b/g, '').trim() + ' ' + c;
+  }
+}
+function num(v) { return typeof v === 'number' ? v : parseFloat(v) || 0; }
+function days(d) { return Math.max(0, Math.floor((Date.now() - new Date(d)) / 86400000)); }
+
+/* ── STATUS ── */
+function setSt(s, m) {
+  const dot = document.getElementById('sdot');
+  const txt = document.getElementById('stxt');
+  if (dot) dot.className = 'status-dot' + (s === 'loading' ? ' loading' : s === 'err' ? ' err' : '');
+  if (txt) txt.textContent = m;
+  const banner = document.getElementById('err-banner');
+  if (banner) {
+    if (s === 'err') { banner.textContent = '⚠ ' + m + ' — Check connection or refresh.'; banner.classList.add('show'); }
+    else banner.classList.remove('show');
+  }
+}
+
+/* ── localStorage CACHE ── */
+const CACHE_KEY = 'bdc_space_fund_v1';
+function loadCached() {
+  try { const r = localStorage.getItem(CACHE_KEY); if (r) return JSON.parse(r); } catch(_) {}
+  return null;
+}
+function saveCache(d) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch(_) {}
+}
+
+/* ── LOAD data.json ── */
+async function loadData() {
+  const cached = loadCached();
+  if (cached) {
+    renderAll(cached);
+    setSt('live', '⏱ Cached — refreshing…');
+  } else {
+    setSt('loading', 'Loading…');
+  }
+
+  const urls = [
+    'data.json?t=' + Date.now(),
+    'https://divtrader.github.io/bdc-space-fund/data.json?t=' + Date.now(),
+  ];
+
+  let D = null, lastErr = '';
+  for (const url of urls) {
+    try {
+      const r = await fetch(url, { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      D = JSON.parse(await r.text());
+      break;
+    } catch(e) { lastErr = e.message; }
+  }
+
+  if (!D) {
+    if (!cached) setSt('err', 'Failed: ' + lastErr);
+    else setSt('err', 'Refresh failed — showing cached data');
+    return;
+  }
+
+  saveCache(D);
+  renderAll(D);
+}
+
+async function loadHistory() {
+  const urls = [
+    'history.json?t=' + Date.now(),
+    'https://divtrader.github.io/bdc-space-fund/history.json?t=' + Date.now(),
+  ];
+  for (const url of urls) {
+    try {
+      const r = await fetch(url, { cache: 'no-store' });
+      if (!r.ok) continue;
+      const H = JSON.parse(await r.text());
+      buildPerfChart(H);
+      break;
+    } catch(_) {}
+  }
+}
+
+function forceRefresh() {
+  setSt('loading', 'Refreshing…');
+  loadData();
+  loadHistory();
+}
+
+/* ── MARKET STATUS (NYSE) ── */
+function nyseHolidays(yr) {
+  const fmt = d => d.toISOString().slice(0,10);
+  const obs = (yr,m,day) => { const d=new Date(yr,m-1,day); if(d.getDay()===6) d.setDate(day-1); else if(d.getDay()===0) d.setDate(day+1); return fmt(d); };
+  const nthMon = (yr,m,n) => { const d=new Date(yr,m-1,1); d.setDate(1+(1-d.getDay()+7)%7+(n-1)*7); return fmt(d); };
+  const lastMon = (yr,m) => { const d=new Date(yr,m,0); d.setDate(d.getDate()-(d.getDay()+6)%7); return fmt(d); };
+  const nthThu = (yr,m,n) => { const d=new Date(yr,m-1,1); d.setDate(1+(4-d.getDay()+7)%7+(n-1)*7); return fmt(d); };
+  const easter = yr => { const a=yr%19,b=Math.floor(yr/100),c=yr%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,mn=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*mn+114)/31),dy=(h+l-7*mn+114)%31+1; return new Date(yr,mo-1,dy); };
+  const gf = yr => { const e=easter(yr); e.setDate(e.getDate()-2); return fmt(e); };
+  return [
+    obs(yr,1,1), nthMon(yr,1,3), nthMon(yr,2,3), gf(yr), lastMon(yr,5),
+    obs(yr,6,19), obs(yr,7,4), nthMon(yr,9,1), nthThu(yr,11,4), obs(yr,12,25),
+  ];
+}
+
+function updateMarketStatus(tsLabel) {
+  const now = new Date();
+  const etParts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  }).formatToParts(now);
+  const ep = {};
+  etParts.forEach(p => { if (p.type !== 'literal') ep[p.type] = p.value; });
+  const etDate = `${ep.year}-${ep.month}-${ep.day}`;
+  const etH    = parseInt(ep.hour) % 24;
+  const etMins = etH * 60 + parseInt(ep.minute);
+  const yr     = parseInt(ep.year);
+  const holidays  = nyseHolidays(yr);
+  const isWeekday = !['Sat','Sun'].includes(ep.weekday);
+  const isHoliday = holidays.includes(etDate);
+  const marketOpen = isWeekday && !isHoliday && etMins >= 9*60+30 && etMins < 16*60;
+  const dot = document.getElementById('sdot');
+  if (dot) dot.style.background = marketOpen ? 'var(--green)' : 'var(--teal)';
+  setSt('live', 'Prices: ' + tsLabel + (marketOpen ? ' · Market open' : ' · Market closed'));
+}
+
+/* ── RENDER ALL ── */
+function renderAll(D) {
+  try {
+    // Format timestamp
+    let tsLabel = D.as_of || '—';
+    try {
+      if (D.generated) {
+        const utcStr = D.generated.replace(' UTC','').replace(' ','T') + ':00Z';
+        const d = new Date(utcStr);
+        if (!isNaN(d)) {
+          const parts = new Intl.DateTimeFormat(undefined, {
+            month:'2-digit', day:'2-digit', year:'numeric',
+            hour:'2-digit', minute:'2-digit', hour12: false
+          }).formatToParts(d);
+          const p = {};
+          parts.forEach(x => { if (x.type !== 'literal') p[x.type] = x.value; });
+          const h = parseInt(p.hour) % 24;
+          tsLabel = `${p.day}/${p.month}/${p.year} ${String(h).padStart(2,'0')}:${p.minute}`;
+        }
+      }
+    } catch(_) {}
+
+    updateMarketStatus(tsLabel);
+    const ftEl = document.getElementById('ft-ts');
+    if (ftEl) ftEl.textContent = tsLabel;
+
+    const h = D.holdings || [];
+    const totalVal  = num(D.total_val);
+    const totalCost = num(D.total_cost);
+    const totalPnl  = num(D.total_pnl);
+    const pnlPct    = num(D.total_pnl_pct);
+    const spyRet    = D.spy_ret;
+    const alpha     = (D.total_pnl_pct != null && spyRet != null)
+                      ? round2(num(D.total_pnl_pct) - num(spyRet)) : null;
+
+    /* Hero KPIs */
+    set('kpi-val', totalVal > 0 ? totalVal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—');
+
+    const pnlBadge = document.getElementById('kpi-pnl-badge');
+    if (pnlBadge) {
+      pnlBadge.textContent = usd(totalPnl) + ' total';
+      pnlBadge.className = 'kpi-badge ' + cls(totalPnl);
+    }
+    set('kpi-cost', 'Cost basis: ' + usdPlain(totalCost));
+
+    set('kpi-pnl-usd', usd(totalPnl), cls(totalPnl));
+    const pnlPctBadge = document.getElementById('kpi-pnl-pct-badge');
+    if (pnlPctBadge) {
+      pnlPctBadge.textContent = ps(pnlPct);
+      pnlPctBadge.className = 'kpi-badge ' + cls(pnlPct);
+    }
+
+    const alphaEl = document.getElementById('kpi-alpha');
+    if (alphaEl) { alphaEl.textContent = ps(alpha); alphaEl.className = 'kpi-big mono ' + cls(alpha); }
+
+    const spyBadge = document.getElementById('kpi-spy-badge');
+    if (spyBadge) {
+      spyBadge.textContent = 'SPY ' + ps(spyRet);
+      spyBadge.className = 'kpi-badge ' + cls(spyRet);
+    }
+
+    /* Holdings table */
+    renderHoldings(h, totalVal);
+
+    /* Sector donut */
+    buildSectorChart(h, totalVal);
+
+  } catch(e) {
+    setSt('err', 'Render error: ' + e.message);
+    console.error(e);
+  }
+}
+
+function round2(v) { return Math.round(v * 100) / 100; }
+
+/* ── HOLDINGS TABLE ── */
+function renderHoldings(holdings, totalVal) {
+  const el = document.getElementById('hold-body');
+  if (!el) return;
+
+  const maxVal = Math.max(...holdings.map(h => num(h.cur_val) || 0));
+
+  el.innerHTML = holdings.map(h => {
+    const curPrice = h.cur  ? '$' + num(h.cur).toFixed(2) : '—';
+    const curVal   = h.cur_val ? '$' + num(h.cur_val).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+    const pnlDollar = h.pnl  != null ? usd(h.pnl)   : '—';
+    const pnlPct    = h.pnl_pct != null ? ps(h.pnl_pct) : '—';
+    const dayCh     = h.day != null ? ps(h.day) : '—';
+    const weight    = totalVal > 0 && h.cur_val ? (num(h.cur_val) / totalVal * 100) : 0;
+    const fillW     = maxVal > 0 ? (num(h.cur_val || 0) / maxVal * 100).toFixed(0) : 0;
+    const pnlC  = cls(h.pnl);
+    const dayC  = cls(h.day);
+
+    return `<div class="hold-row">
+      <div class="col-ticker">
+        <div class="tk">${esc(h.ticker)}</div>
+        <div class="bk">${esc(h.bucket)}</div>
+      </div>
+      <div class="col-name">
+        <div class="nm">${esc(h.name)}</div>
+        <div class="nm-b">${esc(h.bucket)}</div>
+      </div>
+      <div class="col-shares"><div class="sv">${h.shares}</div></div>
+      <div class="col-cost">
+        <div class="cv">$${num(h.cost).toFixed(2)}</div>
+        <div class="cv-b">${'$' + num(h.cost_basis).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+      </div>
+      <div class="col-cur">
+        <div class="cp">${curPrice}</div>
+        <div class="cv2">${curVal}</div>
+      </div>
+      <div class="col-pnl">
+        <div class="pv ${pnlC}">${pnlDollar}</div>
+        <div class="pp ${pnlC}">${pnlPct}</div>
+      </div>
+      <div class="col-day"><div class="dv ${dayC}">${dayCh}</div></div>
+      <div class="col-weight">
+        <div class="w-pct">${weight.toFixed(1)}%</div>
+        <div class="w-bar"><div class="w-fill" style="width:${fillW}%"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── SECTOR DONUT ── */
+let sectorBuilt = false;
+function buildSectorChart(holdings, totalVal) {
+  if (sectorBuilt) return;
+  const el = document.getElementById('sector-chart');
+  if (!el) return;
+
+  // Group by bucket using current value weight
+  const m = {};
+  holdings.forEach(h => {
+    const v = totalVal > 0 && h.cur_val ? (num(h.cur_val) / totalVal * 100) : (1 / holdings.length * 100);
+    m[h.bucket] = (m[h.bucket] || 0) + v;
+  });
+  const s = Object.entries(m).sort((a,b) => b[1] - a[1]);
+
+  sectorBuilt = true;
+  new Chart(el, {
+    type: 'doughnut',
+    data: {
+      labels: s.map(x => x[0]),
+      datasets: [{
+        data: s.map(x => x[1]),
+        backgroundColor: s.map(([l]) => SC[l] || '#555'),
+        borderColor: '#000',
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      cutout: '65%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed.toFixed(1)}%` } }
+      }
+    }
+  });
+
+  const legEl = document.getElementById('sector-leg');
+  if (legEl) legEl.innerHTML = s.map(([l, w]) =>
+    `<div class="sleg-item">
+      <div class="sleg-dot" style="background:${SC[l] || '#555'}"></div>
+      <span class="sleg-name">${esc(l)}</span>
+      <span class="sleg-w">${w.toFixed(1)}%</span>
+    </div>`
+  ).join('');
+}
+
+/* ── PERFORMANCE CHART ── */
+let perfBuilt = false;
+function buildPerfChart(H) {
+  if (perfBuilt) return;
+  const el = document.getElementById('perf-chart');
+  if (!el) return;
+
+  const pts = H.filter(d => d.portfolio != null);
+  if (pts.length < 2) {
+    const card = el.closest('.perf-card');
+    if (card) card.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:180px;color:var(--t3);font-size:13px;text-align:center;padding:0 20px">
+      Performance chart will populate as prices update.<br>
+      <span style="font-size:11px;color:var(--t4);display:block;margin-top:6px">Check back after the next hourly update.</span>
+    </div>`;
+    return;
+  }
+
+  perfBuilt = true;
+  new Chart(el, {
+    type: 'line',
+    data: {
+      labels: pts.map(d => fmtTs(d.ts)),
+      datasets: [
+        {
+          label: 'BDC Space Fund',
+          data: pts.map(d => d.portfolio),
+          borderColor: '#5ac8fa',
+          borderWidth: 2.5,
+          pointRadius: 0,
+          fill: true,
+          backgroundColor: 'rgba(90,200,250,0.08)',
+          tension: 0.4,
+        },
+        {
+          label: 'S&P 500',
+          data: pts.map(d => d.spy),
+          borderColor: 'rgba(255,255,255,0.3)',
+          borderWidth: 1.5,
+          borderDash: [5,4],
+          pointRadius: 0,
+          fill: false,
+          tension: 0.4,
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, labels: { color: 'rgba(255,255,255,0.55)', font: { size: 11 }, boxWidth: 14 } },
+        tooltip: {
+          mode: 'index',
+          callbacks: { label: c => ` ${c.dataset.label}: ${c.raw >= 0 ? '+' : ''}${Number(c.raw).toFixed(2)}%` }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 9 }, maxTicksLimit: 8 },
+          grid:  { color: 'rgba(255,255,255,0.05)' }
+        },
+        y: {
+          ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 9 }, callback: v => v + '%' },
+          grid:  { color: 'rgba(255,255,255,0.05)' }
+        }
+      }
+    }
+  });
+}
+
+function fmtTs(ts) {
+  try {
+    const d = new Date(ts.replace(' UTC','').replace(' ','T') + 'Z');
+    return d.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  } catch(_) { return ts.slice(5,10); }
+}
+
+/* ── BOOT ── */
+loadData();
+loadHistory();
+</script>
+</body>
+</html>
