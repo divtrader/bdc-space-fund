@@ -359,7 +359,6 @@ html, body {
         <span class="status-dot" id="sdot"></span>
         <span id="stxt">Loading…</span>
       </div>
-      <button id="refresh-btn" onclick="forceRefresh()">↻ Refresh</button>
     </div>
   </div>
 
@@ -530,9 +529,10 @@ async function loadData() {
     setSt('loading', 'Loading…');
   }
 
+  const cb = Date.now();
   const urls = [
-    'data.json?t=' + Date.now(),
-    'https://divtrader.github.io/bdc-space-fund/data.json?t=' + Date.now(),
+    'https://divtrader.github.io/bdc-space-fund/data.json?v=' + cb,
+    'data.json?v=' + cb,
   ];
 
   let D = null, lastErr = '';
@@ -556,9 +556,10 @@ async function loadData() {
 }
 
 async function loadHistory() {
+  const cb = Date.now();
   const urls = [
-    'history.json?t=' + Date.now(),
-    'https://divtrader.github.io/bdc-space-fund/history.json?t=' + Date.now(),
+    'https://divtrader.github.io/bdc-space-fund/history.json?v=' + cb,
+    'history.json?v=' + cb,
   ];
   for (const url of urls) {
     try {
@@ -862,6 +863,8 @@ function fmtTs(ts) {
 /* ── BOOT ── */
 loadData();
 loadHistory();
+// Auto-refresh every 5 minutes while page is open
+setInterval(() => { loadData(); loadHistory(); }, 5 * 60 * 1000);
 </script>
 </body>
 </html>
