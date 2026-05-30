@@ -318,6 +318,24 @@ html, body {
 .sleg-name { flex: 1; color: var(--t2); }
 .sleg-w    { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--t3); }
 
+/* ── REBALANCE CARD ── */
+.rebal-card {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  padding: 16px 18px; margin-bottom: 18px;
+  border-left: 3px solid var(--accent);
+}
+@media (min-width: 600px) { .rebal-card { grid-template-columns: 1fr 1fr 1fr; } }
+.rebal-block { min-width: 0; }
+.rebal-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--t4); margin-bottom: 4px; }
+.rebal-val { font-size: 15px; font-weight: 700; color: var(--t1); line-height: 1.2; font-family: 'JetBrains Mono', monospace; }
+.rebal-sub { font-size: 11px; color: var(--t3); margin-top: 2px; }
+.rebal-status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; }
+.rebal-status .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.rebal-status.ok  { color: var(--green); }
+.rebal-status.ok  .dot { background: var(--green); }
+.rebal-status.due { color: var(--amber, #ffd60a); }
+.rebal-status.due .dot { background: var(--amber, #ffd60a); }
+
 /* ── FOOTER ── */
 .footer {
   text-align: center;
@@ -403,6 +421,26 @@ html, body {
         </div>
       </div>
 
+    </div>
+
+    <!-- REBALANCE STATUS -->
+    <div class="sec-head"><span class="sec-accent"></span>Rebalancing</div>
+    <div class="glass-card rebal-card">
+      <div class="rebal-block">
+        <div class="rebal-lbl">Next Rebalance</div>
+        <div class="rebal-val" id="rebal-date">—</div>
+        <div class="rebal-sub" id="rebal-days">—</div>
+      </div>
+      <div class="rebal-block">
+        <div class="rebal-lbl">Status</div>
+        <div class="rebal-status zero" id="rebal-status"><span class="dot"></span><span id="rebal-status-txt">—</span></div>
+        <div class="rebal-sub" id="rebal-drift">—</div>
+      </div>
+      <div class="rebal-block">
+        <div class="rebal-lbl">Schedule</div>
+        <div class="rebal-val" style="font-size:13px">Quarterly</div>
+        <div class="rebal-sub">Or if any holding drifts &gt;5%</div>
+      </div>
     </div>
 
     <!-- PERFORMANCE CHART -->
@@ -682,6 +720,9 @@ function renderAll(D) {
     /* Sector donut */
     buildSectorChart(h, totalVal);
 
+    /* Rebalance status (drift) */
+    renderRebalance(h, totalVal, totalCost);
+
   } catch(e) {
     setSt('err', 'Render error: ' + e.message);
     console.error(e);
@@ -858,6 +899,49 @@ function fmtTs(ts) {
     const d = new Date(ts.replace(' UTC','').replace(' ','T') + 'Z');
     return d.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
   } catch(_) { return ts.slice(5,10); }
+}
+
+/* ── REBALANCE ── */
+const INCEPTION = new Date(2026, 4, 29); // 29 May 2026
+const DRIFT_THRESHOLD = 5; // % absolute drift triggers an early rebalance
+
+function nextRebalanceDate() {
+  // Quarterly from inception: add 3-month steps until the date is in the future
+  const now = new Date();
+  let d = new Date(INCEPTION);
+  while (d <= now) d.setMonth(d.getMonth() + 3);
+  return d;
+}
+
+function renderRebalance(holdings, totalVal, totalCost) {
+  // Date + countdown
+  const next = nextRebalanceDate();
+  const daysLeft = Math.ceil((next - new Date()) / 86400000);
+  const dEl = document.getElementById('rebal-date');
+  const sEl = document.getElementById('rebal-days');
+  if (dEl) dEl.textContent = next.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  if (sEl) sEl.textContent = daysLeft + ' day' + (daysLeft !== 1 ? 's' : '') + ' to go';
+
+  // Max drift across holdings (current weight − target weight)
+  let maxDrift = 0, maxTicker = '';
+  if (holdings && holdings.length && totalVal > 0 && totalCost > 0) {
+    holdings.forEach(h => {
+      const target = num(h.cost_basis) / totalCost * 100;
+      const nowW   = num(h.cur_val) / totalVal * 100;
+      const drift  = Math.abs(nowW - target);
+      if (drift > maxDrift) { maxDrift = drift; maxTicker = h.ticker; }
+    });
+  }
+
+  const stEl  = document.getElementById('rebal-status');
+  const txtEl = document.getElementById('rebal-status-txt');
+  const drEl  = document.getElementById('rebal-drift');
+  const breached = maxDrift > DRIFT_THRESHOLD;
+  if (stEl)  stEl.className = 'rebal-status ' + (breached ? 'due' : 'ok');
+  if (txtEl) txtEl.textContent = breached ? 'Rebalance suggested' : 'No rebalance needed';
+  if (drEl)  drEl.textContent = maxTicker
+    ? `Max drift ${maxDrift.toFixed(1)}% (${maxTicker})`
+    : 'Awaiting price data';
 }
 
 /* ── BOOT ── */
