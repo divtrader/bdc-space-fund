@@ -32,22 +32,23 @@ def _fetch_one(t: str, header: str):
     try:
         result = subprocess.run(
             ["curl", "-s", "-A", "Mozilla/5.0",
-             f"https://stooq.com/q/l/?s={t.lower()}.us&f=sd2t2ohlcv&e=csv"],
+             f"https://stooq.com/q/l/?s={t.lower()}.us&f=sd2t2ohlcvp&e=csv"],
             capture_output=True, text=True, timeout=12
         )
         raw = result.stdout.strip()
-        if not raw or "N/D" in raw.split(",")[4:]:
+        # Close is field index 6; require it present (prev-close may be N/D, handled below)
+        if not raw or len(raw.split(",")) < 7 or raw.split(",")[6] in ("N/D", ""):
             return None
         reader = csv.DictReader(io.StringIO(header + raw))
         for row in reader:
             close_val = row.get("Close", "")
             open_val  = row.get("Open", "")
+            prev_val  = row.get("PrevClose", "")
             if close_val not in ("N/D", "", None):
-                return {
-                    "close": float(close_val),
-                    "open":  float(open_val) if open_val not in ("N/D", "") else float(close_val),
-                    "date":  row["Date"],
-                }
+                close = float(close_val)
+                opn   = float(open_val) if open_val not in ("N/D", "") else close
+                prev  = float(prev_val) if prev_val not in ("N/D", "", None) else opn
+                return {"close": close, "open": opn, "prev": prev, "date": row["Date"]}
     except Exception as e:
         print(f"  Warning: {t} — {e}")
     return None
@@ -56,7 +57,7 @@ def _fetch_one(t: str, header: str):
 def fetch_stooq(tickers: list[str]) -> dict:
     """Fetch Stooq EOD CSV one ticker at a time, with one retry on miss."""
     import time
-    HEADER = "Symbol,Date,Time,Open,High,Low,Close,Volume\n"
+    HEADER = "Symbol,Date,Time,Open,High,Low,Close,Volume,PrevClose\n"
     prices = {}
     for i, t in enumerate(tickers):
         if i > 0 and i % 10 == 0:
@@ -102,12 +103,12 @@ def main():
     for h in HOLDINGS:
         t      = h["ticker"]
         cur    = prices.get(t, {}).get("close")
-        opn    = prices.get(t, {}).get("open") or cur
+        prev   = prices.get(t, {}).get("prev") or prices.get(t, {}).get("open") or cur
         cost_basis = round(h["shares"] * h["cost"], 4)
         cur_val    = round(h["shares"] * cur, 4)    if cur else None
         pnl        = round(cur_val - cost_basis, 4)  if cur_val is not None else None
         pnl_pct    = round((cur / h["cost"] - 1) * 100, 4) if cur else None
-        day        = round((cur / opn - 1) * 100, 4)        if cur and opn else None
+        day        = round((cur / prev - 1) * 100, 4)       if cur and prev else None
 
         total_cost += cost_basis
         if cur_val is not None:
