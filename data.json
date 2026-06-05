@@ -2,9 +2,9 @@
   "generated": "2026-06-05 15:21 UTC",
   "as_of": "2026-06-05",
   "total_cost": 9701.44,
-  "total_val": 8131.48,
-  "total_pnl": -1569.97,
-  "total_pnl_pct": -16.1828,
+  "total_val": 8471.27,
+  "total_pnl": -1230.17,
+  "total_pnl_pct": -12.6803,
   "spy_ret": -0.3294,
   "spy_price": 748.935,
   "holdings": [
@@ -169,11 +169,11 @@
       "shares": 22,
       "cost": 17.53,
       "cost_basis": 385.66,
-      "cur": null,
-      "cur_val": null,
-      "pnl": null,
-      "pnl_pct": null,
-      "day": null,
+      "cur": 15.445,
+      "cur_val": 339.79,
+      "pnl": -45.87,
+      "pnl_pct": -11.8939,
+      "day": -2.1849,
       "date": ""
     }
   ]
