@@ -1,12 +1,12 @@
 {
-  "generated": "2026-06-05 13:51 UTC",
+  "generated": "2026-06-05 15:20 UTC",
   "as_of": "2026-06-05",
   "total_cost": 9701.44,
-  "total_val": 6979.15,
-  "total_pnl": -2722.29,
-  "total_pnl_pct": -28.0607,
-  "spy_ret": 0.0798,
-  "spy_price": 752.01,
+  "total_val": 8224.81,
+  "total_pnl": -1476.63,
+  "total_pnl_pct": -15.2208,
+  "spy_ret": -0.2761,
+  "spy_price": 749.335,
   "holdings": [
     {
       "ticker": "RKLB",
@@ -15,11 +15,11 @@
       "shares": 16,
       "cost": 138.8,
       "cost_basis": 2220.8,
-      "cur": 117.0,
-      "cur_val": 1872.0,
-      "pnl": -348.8,
-      "pnl_pct": -15.7061,
-      "day": -2.4594,
+      "cur": 114.08,
+      "cur_val": 1825.28,
+      "pnl": -395.52,
+      "pnl_pct": -17.8098,
+      "day": -4.8937,
       "date": "2026-06-05"
     },
     {
@@ -29,11 +29,11 @@
       "shares": 13,
       "cost": 109.625,
       "cost_basis": 1425.125,
-      "cur": 103.0,
-      "cur_val": 1339.0,
-      "pnl": -86.125,
-      "pnl_pct": -6.0433,
-      "day": -3.9985,
+      "cur": 98.51,
+      "cur_val": 1280.63,
+      "pnl": -144.495,
+      "pnl_pct": -10.1391,
+      "day": -8.1834,
       "date": "2026-06-05"
     },
     {
@@ -47,7 +47,7 @@
       "cur_val": 763.245,
       "pnl": -221.823,
       "pnl_pct": -22.5185,
-      "day": -16.5059,
+      "day": 0.0,
       "date": "2026-06-05"
     },
     {
@@ -57,11 +57,11 @@
       "shares": 17,
       "cost": 48.57,
       "cost_basis": 825.69,
-      "cur": 50.1499,
-      "cur_val": 852.5483,
-      "pnl": 26.8583,
-      "pnl_pct": 3.2528,
-      "day": -3.6875,
+      "cur": 48.175,
+      "cur_val": 818.975,
+      "pnl": -6.715,
+      "pnl_pct": -0.8133,
+      "day": -7.4803,
       "date": "2026-06-05"
     },
     {
@@ -75,7 +75,7 @@
       "cur_val": 700.8,
       "pnl": -114.6,
       "pnl_pct": -14.0545,
-      "day": -3.9079,
+      "day": 0.0,
       "date": "2026-06-05"
     },
     {
@@ -85,11 +85,11 @@
       "shares": 2,
       "cost": 345.2,
       "cost_basis": 690.4,
-      "cur": 330.1375,
-      "cur_val": 660.275,
-      "pnl": -30.125,
-      "pnl_pct": -4.3634,
-      "day": -0.8507,
+      "cur": 332.51,
+      "cur_val": 665.02,
+      "pnl": -25.38,
+      "pnl_pct": -3.6761,
+      "day": -0.1382,
       "date": "2026-06-05"
     },
     {
@@ -99,12 +99,12 @@
       "shares": 2,
       "cost": 259.05,
       "cost_basis": 518.1,
-      "cur": null,
-      "cur_val": null,
-      "pnl": null,
-      "pnl_pct": null,
-      "day": null,
-      "date": ""
+      "cur": 256.24,
+      "cur_val": 512.48,
+      "pnl": -5.62,
+      "pnl_pct": -1.0847,
+      "day": 2.7714,
+      "date": "2026-06-05"
     },
     {
       "ticker": "BKSY",
@@ -113,11 +113,11 @@
       "shares": 10,
       "cost": 44.83,
       "cost_basis": 448.3,
-      "cur": 37.02,
-      "cur_val": 370.2,
-      "pnl": -78.1,
-      "pnl_pct": -17.4214,
-      "day": -6.6566,
+      "cur": 35.3709,
+      "cur_val": 353.709,
+      "pnl": -94.591,
+      "pnl_pct": -21.0999,
+      "day": -10.8147,
       "date": "2026-06-05"
     },
     {
@@ -127,11 +127,11 @@
       "shares": 22,
       "cost": 22.6,
       "cost_basis": 497.2,
-      "cur": 19.14,
-      "cur_val": 421.08,
-      "pnl": -76.12,
-      "pnl_pct": -15.3097,
-      "day": -4.491,
+      "cur": 17.565,
+      "cur_val": 386.43,
+      "pnl": -110.77,
+      "pnl_pct": -22.2788,
+      "day": -12.3503,
       "date": "2026-06-05"
     },
     {
@@ -141,12 +141,12 @@
       "shares": 4,
       "cost": 108.725,
       "cost_basis": 434.9,
-      "cur": null,
-      "cur_val": null,
-      "pnl": null,
-      "pnl_pct": null,
-      "day": null,
-      "date": ""
+      "cur": 116.76,
+      "cur_val": 467.04,
+      "pnl": 32.14,
+      "pnl_pct": 7.3902,
+      "day": -0.8997,
+      "date": "2026-06-05"
     },
     {
       "ticker": "HXL",
@@ -155,12 +155,12 @@
       "shares": 5,
       "cost": 90.96,
       "cost_basis": 454.8,
-      "cur": null,
-      "cur_val": null,
-      "pnl": null,
-      "pnl_pct": null,
-      "day": null,
-      "date": ""
+      "cur": 90.24,
+      "cur_val": 451.2,
+      "pnl": -3.6,
+      "pnl_pct": -0.7916,
+      "day": 0.748,
+      "date": "2026-06-05"
     },
     {
       "ticker": "MNTS",
