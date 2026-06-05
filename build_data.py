@@ -36,8 +36,12 @@ def _fetch_one(t: str, header: str):
             capture_output=True, text=True, timeout=12
         )
         raw = result.stdout.strip()
-        # Close is field index 6; require it present (prev-close may be N/D, handled below)
-        if not raw or len(raw.split(",")) < 7 or raw.split(",")[6] in ("N/D", ""):
+        # Reject HTML anti-bot challenge pages and any non-CSV response
+        if not raw or raw[0] == "<" or "html" in raw[:64].lower():
+            return None
+        fields = raw.split(",")
+        # Field 0 must look like "TICKER.US"; close is field 6
+        if len(fields) < 7 or not fields[0].upper().endswith(".US") or fields[6] in ("N/D", ""):
             return None
         reader = csv.DictReader(io.StringIO(header + raw))
         for row in reader:
@@ -87,6 +91,24 @@ def main():
               f"SPY={'ok' if 'SPY' in prices else 'MISSING'}). "
               f"Keeping existing data.json — NOT overwriting.")
         return
+
+    # ── CARRY-FORWARD: for any straggler ticker Stooq throttled this run, reuse
+    # its last known price so the portfolio value isn't distorted by a fake $0. ──
+    try:
+        prev = json.loads((ROOT / "data.json").read_text())
+        prev_px = {h["ticker"]: h for h in prev.get("holdings", [])}
+        if prev.get("spy_price") is not None:
+            prev_px["SPY"] = {"cur": prev["spy_price"]}
+    except Exception:
+        prev_px = {}
+    stale = []
+    for t in all_tickers:
+        if t not in prices and t in prev_px and prev_px[t].get("cur"):
+            c = prev_px[t]["cur"]
+            prices[t] = {"close": c, "open": c, "prev": c, "date": prev.get("as_of", "")}
+            stale.append(t)
+    if stale:
+        print(f"  Carried forward last price for: {stale}")
 
     now   = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     as_of = next(iter(prices.values()))["date"] if prices else "—"
