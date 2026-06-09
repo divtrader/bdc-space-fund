@@ -26,50 +26,52 @@ HOLDINGS = [
     {"ticker": "MNTS",  "name": "Momentus",               "shares": 22,  "cost": 17.53,     "bucket": "In-Space Logistics"},
 ]
 
-# ── FETCH PRICES VIA STOOQ ──────────────────────────────────────────────────
-def _fetch_one(t: str, header: str):
-    """Fetch a single ticker from Stooq; return price dict or None."""
+# ── FETCH PRICES VIA YAHOO FINANCE ───────────────────────────────────────────
+# Stooq started serving a JS anti-bot challenge to data-centre IPs (incl. GitHub
+# Actions), so we use Yahoo's chart API, which works reliably server-side.
+def _fetch_one(t: str):
+    """Fetch current + previous close for one ticker from Yahoo Finance."""
+    url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{t}"
+           f"?interval=1d&range=5d")
     try:
         result = subprocess.run(
-            ["curl", "-s", "-A", "Mozilla/5.0",
-             f"https://stooq.com/q/l/?s={t.lower()}.us&f=sd2t2ohlcvp&e=csv"],
-            capture_output=True, text=True, timeout=12
+            ["curl", "-s", "-A", "Mozilla/5.0", url],
+            capture_output=True, text=True, timeout=15
         )
-        raw = result.stdout.strip()
-        # Reject HTML anti-bot challenge pages and any non-CSV response
-        if not raw or raw[0] == "<" or "html" in raw[:64].lower():
+        data = json.loads(result.stdout)
+        res = data["chart"]["result"][0]
+        m = res["meta"]
+        cur = m.get("regularMarketPrice")
+        if cur is None:
             return None
-        fields = raw.split(",")
-        # Field 0 must look like "TICKER.US"; close is field 6
-        if len(fields) < 7 or not fields[0].upper().endswith(".US") or fields[6] in ("N/D", ""):
-            return None
-        reader = csv.DictReader(io.StringIO(header + raw))
-        for row in reader:
-            close_val = row.get("Close", "")
-            open_val  = row.get("Open", "")
-            prev_val  = row.get("PrevClose", "")
-            if close_val not in ("N/D", "", None):
-                close = float(close_val)
-                opn   = float(open_val) if open_val not in ("N/D", "") else close
-                prev  = float(prev_val) if prev_val not in ("N/D", "", None) else opn
-                return {"close": close, "open": opn, "prev": prev, "date": row["Date"]}
+        prev = m.get("chartPreviousClose") or m.get("previousClose") or cur
+        # Most recent session open from the daily series (fallback to prev)
+        opn = prev
+        try:
+            opens = [o for o in res["indicators"]["quote"][0]["open"] if o is not None]
+            if opens:
+                opn = opens[-1]
+        except Exception:
+            pass
+        ts = m.get("regularMarketTime")
+        date = (datetime.datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
+                if ts else "")
+        return {"close": float(cur), "open": float(opn),
+                "prev": float(prev), "date": date}
     except Exception as e:
         print(f"  Warning: {t} — {e}")
     return None
 
 
 def fetch_stooq(tickers: list[str]) -> dict:
-    """Fetch Stooq EOD CSV one ticker at a time, with one retry on miss."""
+    """Fetch prices one ticker at a time, with one retry on miss."""
     import time
-    HEADER = "Symbol,Date,Time,Open,High,Low,Close,Volume,PrevClose\n"
     prices = {}
-    for i, t in enumerate(tickers):
-        if i > 0 and i % 10 == 0:
-            time.sleep(1)
-        p = _fetch_one(t, HEADER)
+    for t in tickers:
+        p = _fetch_one(t)
         if p is None:
-            time.sleep(1.5)          # back off, then retry once (handles rate-limiting)
-            p = _fetch_one(t, HEADER)
+            time.sleep(0.8)          # brief back-off, then retry once
+            p = _fetch_one(t)
         if p is not None:
             prices[t] = p
     return prices
