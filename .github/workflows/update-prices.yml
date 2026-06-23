@@ -1,9 +1,8 @@
 name: Update prices
 
 on:
-  schedule:
-    # Every 30 min Mon-Fri 13:00-21:00 UTC while market is open
-    - cron: "0,30 13-21 * * 1-5"
+  # Triggered by the pofmuis-etf "Update prices" workflow right after it runs
+  # (chained via BDC_TOKEN). No own schedule — avoids double-firing.
   workflow_dispatch:
 
 jobs:
