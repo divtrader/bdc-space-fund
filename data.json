@@ -1,12 +1,12 @@
 {
-  "generated": "2026-06-25 20:29 UTC",
+  "generated": "2026-06-25 22:05 UTC",
   "as_of": "2026-06-25",
   "total_cost": 9701.44,
   "total_val": 6901.6,
   "total_pnl": -2799.84,
   "total_pnl_pct": -28.8601,
-  "spy_ret": -2.3835,
-  "spy_price": 733.5,
+  "spy_ret": -2.2771,
+  "spy_price": 734.3,
   "holdings": [
     {
       "ticker": "RKLB",
